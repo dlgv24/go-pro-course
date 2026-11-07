@@ -1,3 +1,3 @@
-module github.com/dlgv24/go-pro-course
+module go-pro-course
 
-go 1.27.1
+go 1.27
