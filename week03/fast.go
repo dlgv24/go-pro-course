@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"hw3/userdata"
 	"io"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -17,23 +17,20 @@ func FastSearch(out io.Writer) {
 	if err != nil {
 		panic(err)
 	}
-
-	fileContents, err := ioutil.ReadAll(file)
-	if err != nil {
-		panic(err)
-	}
+	defer file.Close()
 
 	r := regexp.MustCompile("@")
 	seenBrowsers := make(map[string]struct{})
 	foundUsers := strings.Builder{}
 
-	lines := strings.Split(string(fileContents), "\n")
+	scanner := bufio.NewScanner(file)
 
 	var users []userdata.UserData = nil
-	for _, line := range lines {
+
+	for scanner.Scan() {
 		user := userdata.UserData{}
 		// fmt.Printf("%v %v\n", err, line)
-		err := easyjson.Unmarshal([]byte(line), &user)
+		err := easyjson.Unmarshal([]byte(scanner.Text()), &user)
 		if err != nil {
 			panic(err)
 		}
@@ -52,7 +49,7 @@ func FastSearch(out io.Writer) {
 		for _, browser := range browsers {
 			var match bool
 			for key := range flags {
-				if ok, err := regexp.MatchString(key, browser); ok && err == nil {
+				if ok := strings.Contains(browser, key); ok {
 					flags[key] = true
 					match = true
 				}
